@@ -77,7 +77,8 @@ test_sorting.py
 # Documentation and GitHub files (development only)
 .github/
 docs/
-screenshots/
+.devcontainer/
+# screenshots/ - Keep screenshots for README examples
 
 # Ignore data/output
 *.csv
