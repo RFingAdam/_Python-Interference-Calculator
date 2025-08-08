@@ -79,7 +79,7 @@ test_sorting.py
 docs/
 .devcontainer/
 # screenshots/ - Keep screenshots for README examples
-screenshots/README.md
+# screenshots/README.md - Keep screenshot documentation
 
 # Ignore data/output
 *.csv
