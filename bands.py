@@ -74,6 +74,7 @@ BAND_LIST: List[Band] = [
     
     # ISM Bands
     Band("UHF433", 433, 435, 433, 435, "UHF 433 MHz", "ISM"),
+    Band("UHF450", 450, 470, 450, 470, "UHF 450 MHz", "ISM"),
     Band("ISM902", 902, 928, 902, 928, "ISM 902-928 MHz", "ISM"),
     Band("ISM_24", 2400, 2500, 2400, 2500, "ISM 2.4 GHz Band", "ISM"),
     Band("ISM_58", 5725, 5875, 5725, 5875, "ISM 5.8 GHz Band", "ISM"),
