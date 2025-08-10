@@ -425,20 +425,21 @@ def calculate_all_products(selected_bands: List[Band], guard: float = 0.0, imd2:
     seen = set()
     deduped = []
     for r in results:
-        # Update legacy risk symbols with severity assessment
+        # Update legacy risk symbols with severity assessment - ONLY for products with actual victims
         if r.get('Risk') in ['⚠️', '✓'] and 'Severity' not in r:
             freq = r.get('Frequency_MHz', 0)
             victim = r.get('Victims', '')
             aggressors = r.get('Aggressors', '')
             product_type = r.get('Type', '')
             
-            if r.get('Risk') == '⚠️' and victim:  # Only assess risk items with victims
+            # Only assess risk for products that actually have victims (real interference)
+            if r.get('Risk') == '⚠️' and victim and victim.strip():  # Must have actual victims
                 risk_symbol, severity = assess_risk_severity(freq, victim, aggressors, product_type)
                 r['Risk'] = risk_symbol
                 r['Severity'] = severity
             elif r.get('Risk') == '✓':
-                r['Risk'] = '✅'
-                r['Severity'] = 0
+                r['Risk'] = '✅'  # Convert old safe symbol to new emoji
+                r['Severity'] = 1
         
         # Create unique key based on actual mathematical content
         freq = r.get('Frequency_MHz', 0)
@@ -752,84 +753,89 @@ def assess_risk_severity(frequency: float, victim_code: str, aggressors: str, pr
     Assess risk severity based on frequency, victim, and interference type.
     Returns (risk_symbol, severity_level) where severity_level is 1-5 (5 = most critical).
     """
-    # Critical frequency bands for different services
+    # Critical frequency bands for different services (match band definitions exactly)
     critical_bands = {
-        # GPS/GNSS (high precision navigation)
-        'GNSS_L1': (1575.0, 1576.0, 5),  # Primary GPS frequency
-        'GNSS_L2': (1227.0, 1228.0, 5),  # GPS L2 frequency
-        'GNSS_L5': (1176.0, 1177.0, 4),  # GPS L5 frequency
+        # GPS/GNSS (high precision navigation) - match bands.py definitions
+        'GNSS_L1': (1559.0, 1610.0, 5),  # Full GNSS L1/E1 band (expanded range)
+        'GNSS_L2': (1210.0, 1250.0, 5),  # Full GNSS L2 band (expanded range)
+        'GNSS_L5': (1160.0, 1195.0, 4),  # Full GNSS L5/E5 band (expanded range)
         
         # ISM bands (unlicensed, high interference potential)
         'ISM_24': (2400.0, 2500.0, 4),   # 2.4 GHz ISM (BLE, Wi-Fi, etc.)
         'ISM_58': (5725.0, 5875.0, 3),   # 5.8 GHz ISM
+        'WiFi_24': (2400.0, 2495.0, 4),  # Wi-Fi 2.4 GHz
+        'WiFi_5': (5150.0, 5925.0, 3),   # Wi-Fi 5/6 GHz (expanded)
+        'BLE_ISM': (2402.0, 2485.0, 4),  # BLE in ISM band
         
         # Public Safety (critical communications)
-        'FirstNet': (758.0, 768.0, 5),   # FirstNet uplink
-        'PublicSafety': (763.0, 775.0, 5), # Public safety bands
+        'FirstNet': (755.0, 770.0, 5),   # FirstNet uplink (expanded)
+        'PublicSafety': (758.0, 780.0, 5), # Public safety bands (expanded)
         
         # Cellular uplinks (interference affects base stations)
-        'Cellular_UL': (824.0, 894.0, 4), # Cellular uplinks (affects towers)
-        
-        # Wi-Fi (common coexistence issues)
-        'WiFi_24': (2400.0, 2495.0, 4),  # Wi-Fi 2.4 GHz
-        'WiFi_5': (5150.0, 5925.0, 3),   # Wi-Fi 5/6 GHz
-        
-        # BLE (sensitive to interference)
-        'BLE': (2402.0, 2480.0, 4),      # Bluetooth Low Energy
+        'Cellular_UL': (820.0, 900.0, 4), # Cellular uplinks (expanded)
+        'LTE_Low': (700.0, 900.0, 3),     # LTE low bands  
+        'LTE_Mid': (1700.0, 2200.0, 3),   # LTE mid bands
+        'LTE_High': (2300.0, 2700.0, 2),  # LTE high bands
     }
     
-    # Base severity assessment
-    severity = 1  # Default low risk
-    risk_symbol = "⚠️"
+    # Start with conservative default severity
+    severity = 1  # Start conservative like GitHub version
+    risk_symbol = "🔵"  # Default to low risk (blue) for products with victims
     
-    # Assess victim criticality
+    # Assess victim criticality - more conservative matching
     victim_criticality = {
-        'GNSS_L1': 5, 'GNSS_L2': 5, 'GNSS_L5': 4,  # GPS is critical
+        'GNSS': 5, 'GPS': 5,  # Any GNSS reference is critical
         'LTE_B13': 5, 'LTE_B14': 5,  # Public safety LTE bands
-        'BLE': 4,     # BLE sensitive to interference
-        'WiFi_2G': 4, # Wi-Fi 2.4G high usage
-        'WiFi_5G': 3, # Wi-Fi 5G less congested
-        'HaLow_NA': 3, # Wi-Fi HaLow growing importance
+        'BLE': 3,     # BLE less aggressive than before
+        'WiFi': 3,    # WiFi less aggressive
+        'Wi-Fi': 3,   # Alternative Wi-Fi spelling
+        'HaLow': 2,   # Wi-Fi HaLow
     }
     
-    # Get victim base severity
+    # Get victim base severity - only for real victims (not GENERIC)
     for victim_pattern, crit_level in victim_criticality.items():
-        if victim_pattern in victim_code:
+        if victim_pattern.upper() in victim_code.upper():
             severity = max(severity, crit_level)
             break
     
-    # Check if frequency falls in critical bands
+    # Check if frequency falls in critical bands - more conservative like GitHub
     for band_name, (low, high, band_severity) in critical_bands.items():
         if low <= frequency <= high:
             severity = max(severity, band_severity)
-            # Special case: GPS interference is always critical
-            if 'GNSS' in band_name:
-                severity = 5
+            # GPS interference is always critical but don't double-boost
+            if 'GNSS' in band_name and 'GNSS' in victim_code.upper():
+                severity = 5  # Set to critical for GPS interference
             break
     
-    # Product type severity modifiers
-    if product_type == '3H':  # 3rd harmonics are typically stronger
+    # Product type severity modifiers - more conservative like GitHub version
+    if product_type == '3H':  # 3rd harmonics 
+        severity = min(severity + 1, 5)  # Conservative modifier
+    elif product_type == '2H':  # 2nd harmonics
+        severity = min(severity + 1, 5)  # Conservative modifier
+    elif product_type == 'IM2':  # IM2 products
         severity = min(severity + 1, 5)
-    elif product_type == '2H':  # 2nd harmonics are very strong
-        severity = min(severity + 1, 5)
-    elif product_type == 'IM2':  # IM2 products are often strong
+    elif product_type == 'IM3':  # IM3 products
         severity = min(severity + 1, 5)
     elif product_type in ['IM4', 'IM5', 'IM7']:  # Higher order typically weaker
-        severity = max(severity - 1, 1)
+        severity = max(severity, 1)  # Don't reduce below 1
     
-    # Aggressor analysis - multiple aggressors increase risk
+    # Aggressor analysis - conservative approach
     if ',' in aggressors or ' and ' in aggressors.lower():
         severity = min(severity + 1, 5)  # Multiple aggressors = higher risk
     
-    # Special cases for NA Case 1 analysis
+    # Special critical cases - only for actual public safety bands
     if 'LTE_B13' in aggressors or 'LTE_B14' in aggressors:
-        # Public safety bands as aggressors are critical
         severity = min(severity + 1, 5)
     
-    if 'BLE' in victim_code and 'WiFi' in aggressors:
-        # BLE-WiFi coexistence is critical in ISM band
+    # ISM band coexistence issues - more conservative
+    if ('BLE' in victim_code.upper() and 'WIFI' in aggressors.upper()) or \
+       ('WIFI' in victim_code.upper() and 'BLE' in aggressors.upper()):
         if 2400 <= frequency <= 2500:
-            severity = 5  # Maximum severity for ISM band interference
+            severity = min(severity + 1, 5)  # Conservative ISM boost
+    
+    # GPS interference - conservative boost only for actual GPS victims
+    if any(gps_term in victim_code.upper() for gps_term in ['GNSS', 'GPS']) and any(gps_freq in str(frequency) for gps_freq in ['1575', '1227', '1176']):
+        severity = min(severity + 1, 5)  # GPS victims get conservative boost
     
     # Determine risk symbol based on severity
     if severity >= 5:

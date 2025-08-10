@@ -1,14 +1,58 @@
 # RF Spectrum Interference Calculator
 
-A professional RF tool for analyzing interference, harmonics, and intermodulation products across 70+ wireless bands.
+A professional RF engineering tool for analyzing interference, harmonics, and intermodulation products across 70+ wireless bands with **comprehensive RF system performance analysis**.
+
+## 📊 What's New in v1.8.0 - Production Ready RF Analysis
+- **🔬 Quantitative Analysis**: Real interference power calculations with proper harmonic/IMD modeling
+- **🛠️ Comprehensive System Parameters**: Full RF system modeling with isolation, filtering, and nonlinearity
+- **📱 Industry Presets**: Professional system configurations (mobile, IoT, base station, laboratory)
+- **📊 Advanced Metrics**: Complete interference analysis with desensitization, margins, and risk assessment
+- **🎯 Engineering Results**: Actual dBm levels, professional risk analysis, design guidance
+- **⚡ Complete RF Workflow**: From frequency planning to engineering validation
+
+## 🔧 Professional Use Cases
+- **📐 RF System Design**: Predict interference performance before hardware development
+- **🔍 Pre-hardware Validation**: Validate coexistence with quantitative analysis
+- **📋 Regulatory Analysis**: Professional interference studies with industry-standard methods
+- **🛠️ Design Optimization**: Specific engineering recommendations for isolation and filtering
+- **🎓 Engineering Training**: Standard RF calculations and professional methodology
 
 ## 🚀 Key Features
 - **70+ Wireless Bands**: LTE, Wi-Fi, BLE, GNSS, ISM and more
 - **Complete IMD Analysis**: IM2, IM3, IM4, IM5, IM7 + Harmonics (2H-5H)
+- **🔬 RF Performance Analysis**: Real signal levels, margins, and performance impact
 - **Risk Assessment**: Automatic severity analysis with color-coded alerts
 - **Interactive Charts**: Frequency spectrum, risk analysis, band coverage
 - **Professional Export**: CSV, Excel, JSON with timestamps
 - **Real-time Analysis**: Instant interference calculations and warnings
+
+## ⭐ **Professional RF Performance Analysis**
+
+Transform frequency conflicts into **actionable engineering data**:
+
+### **🎯 Professional Signal-Level Analysis**
+- **P_IM3 = 2×P_in - IIP3** calculations using industry-standard formulas
+- **Real interference power levels** at victim inputs (dBm)
+- **Performance margins** vs sensitivity thresholds
+- **PER estimates** for different modulation schemes
+
+### **🛠️ System Parameter Configuration**
+Choose from professional presets or customize:
+- **📱 Mobile Device**: 20dB isolation, -12dBm IIP3, 23dBm LTE
+- **📡 IoT Gateway**: 35dB isolation, -18dBm IIP3, 20dBm LTE  
+- **🚗 Automotive**: 25dB isolation, -10dBm IIP3, 27dBm LTE
+
+### **📊 Enhanced Results**
+| Type | Freq | Aggressor→Victim | **Power** | **Margin** | **Impact** | **PER** |
+|------|------|------------------|-----------|------------|------------|---------|
+| IM3  | 2442 | LTE+BLE→WiFi    | **-42dBm** | **8dB**    | **Medium** | **5%**  |
+
+### **🎯 How to Access**
+1. Run standard interference analysis
+2. Click **"🔬 Performance Report"** button  
+3. Configure system parameters
+4. Click **"🚀 Run Performance Analysis"**
+5. Get real signal levels and optimization recommendations
 
 ## 🔍 Critical Interference Examples
 
@@ -57,11 +101,18 @@ pip install streamlit pandas altair openpyxl
 streamlit run ui.py
 ```
 
-**Usage:**
+**Basic Usage:**
 1. Select band categories and specific bands
 2. Configure guard margins and analysis products
 3. Click "Calculate Interference" 
 4. Review critical results and export data
+
+**🔬 NEW: Performance Analysis Workflow:**
+1. Complete basic interference analysis (above)
+2. Click **"🔬 Performance Report"** button
+3. Configure system parameters (presets available)
+4. Click **"🚀 Run Performance Analysis"**
+5. Get **real signal levels, margins, and optimization recommendations**
 
 ## 📊 Interactive Analysis Features
 
@@ -93,7 +144,7 @@ Each view provides different insights:
 - **Training**: Real-world RF engineering examples and calculations
 
 ## 📈 Versioning
-Current version: **v1.4.3** - Enhanced visual documentation and simplified interface
+Current version: **v1.8.0** - Production Ready RF Analysis with comprehensive interference calculations and professional reporting
 
 Previous releases: [CHANGELOG.md](CHANGELOG.md)
 
